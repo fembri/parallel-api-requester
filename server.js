@@ -10,12 +10,12 @@ var logData = function(message,request,response) {
 	if (!fs.existsSync(logDir)) 
 		fs.mkdirSync(logDir);
 		
-	var date = dateLog.getFullYear() + '-' + dateLog.getMonth() + '-' + dateLog.getDate();
-	var time = dateLog.getHours + ':' + dateLog.getMinutes + ':' + dateLog.getSeconds;
+	var date = dateLog.getFullYear() + '-' + (dateLog.getMonth()+1) + '-' + dateLog.getDate();
+	var time = dateLog.getHours() + ':' + dateLog.getMinutes() + ':' + dateLog.getSeconds();
 	var logPath = logDir + '/' + date + '.log';
-	var logMessage = date + ' ' + time + ' >>\r\n';
-	logMessage += message + '\r\n' + request + '\r\n' + response + '\r\n';
-	fs.appendFile(logPath,logMessage,function(err){console.log(err)});
+	var logMessage = date + ' ' + time + ' ::\r\n>>';
+	logMessage += message + '\r\n>>' + request + '\r\n>>' + response + '\r\n\r\n';
+	fs.appendFile(logPath,logMessage,function(err){if(err)console.log(err)});
 };
 
 http.createServer(function (request, response) {
@@ -88,5 +88,5 @@ http.createServer(function (request, response) {
     });
 	
 }).listen(serverPort);
-
+logData('Server running at localhost:'+serverPort);
 console.log('Server running at localhost:'+serverPort);
