@@ -1,0 +1,15 @@
+{
+    "name": "fembri/parallel-api-requester",
+    "description": "parallel requester to airlines API",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fembrii",
+            "email": "fembrii@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+
+    }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "parallel-api-requester",
+  "version": "0.0.0",
+  "description": "parallel requester for airlines API",
+  "main": "server.js",
+  "dependencies": {
+    "async": "^0.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "parallel",
+    "api"
+  ],
+  "author": "fembrii@gmail.com",
+  "license": "ISC"
+}
