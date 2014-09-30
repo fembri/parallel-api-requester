@@ -20,6 +20,7 @@ var logData = function(message,request,response,prompt) {
 	if (prompt) console.log(date + ' ' + time + ' ' + message);
 };
 
+http.globalAgent.maxSockets = 10;
 http.createServer(function (request, response) {
     var requestBody = '';
 	var requestData = {};
@@ -37,6 +38,7 @@ http.createServer(function (request, response) {
 				port: 80,
 				path: taskReq.url.pathname,
 				method: 'POST',
+				agent:false,
 				headers: {
 					'X-Auth-Code': taskReq.mac,
 					'Content-Type': 'application/json',
@@ -67,6 +69,8 @@ http.createServer(function (request, response) {
 			});
 			req.write(jsonData);
 			req.end();
+			
+			console.log(http.globalAgent.sockets);
 		} catch (ex) {
 			logData("Get an exception while requesting to server.",JSON.stringify(ex),null,true);
 			callback(false,{
