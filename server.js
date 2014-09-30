@@ -47,19 +47,22 @@ http.createServer(function (request, response) {
 			};
 			var req = http.request(options, function(res) {
 				res.setEncoding('utf8');
-				var result = '';
+				var resultContent = '';
 				var tdata = new Date();
 				res.on('data', function (data) {
-					result += data;
+					resultContent += data;
 				});
 				res.on('end',function(){
 					var tend = new Date();
-					if(res.statusCode != 200)
-						result = {
-							isSuccess: false,
-							errorMessages: errorMessages[res.statusCode] || 'Error: Status Code' + res.statusCode
-						};
-					else result = JSON.parse(result);
+					var result = {};
+					result = JSON.parse(resultContent);
+					if(res.statusCode != 200 || !result || !resultContent)
+					result = {
+						isSuccess: false,
+						resultContent: resultContent,
+						errorMessages: errorMessages[res.statusCode] || 'Error: Status Code' + res.statusCode
+					};
+					
 					result.taskLatency = tend.getTime() - tstart.getTime();
 					result.taskStart = tstart.getHours() + ":" + tstart.getMinutes() + ":" + tstart.getSeconds() + "." + tstart.getMilliseconds();
 					result.taskEnd = tend.getHours() + ":" + tend.getMinutes() + ":" + tend.getSeconds() + "." + tend.getMilliseconds();
