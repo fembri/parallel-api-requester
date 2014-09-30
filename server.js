@@ -38,7 +38,6 @@ http.createServer(function (request, response) {
 				port: 80,
 				path: taskReq.url.pathname,
 				method: 'POST',
-				agent:false,
 				headers: {
 					'X-Auth-Code': taskReq.mac,
 					'Content-Type': 'application/json',
