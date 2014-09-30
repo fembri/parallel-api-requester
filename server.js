@@ -45,6 +45,7 @@ http.createServer(function (request, response) {
 			}, function(res) {
 				res.setEncoding('utf8');
 				var result = '';
+				var tdata = new Date();
 				res.on('data', function (data) {
 					result += data;
 				});
@@ -59,6 +60,7 @@ http.createServer(function (request, response) {
 					result.taskLatency = tend.getTime() - tstart.getTime();
 					result.taskStart = tstart.getHours() + ":" + tstart.getMinutes() + ":" + tstart.getSeconds() + "." + tstart.getMilliseconds();
 					result.taskEnd = tend.getHours() + ":" + tend.getMinutes() + ":" + tend.getSeconds() + "." + tend.getMilliseconds();
+					result.taskData = tdata.getHours() + ":" + tdata.getMinutes() + ":" + tdata.getSeconds() + "." + tdata.getMilliseconds();
 					
 					callback(false,result);
 				});
