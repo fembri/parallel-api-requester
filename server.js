@@ -4,7 +4,7 @@ var async = require('async');
 var fs = require('fs');
 
 var serverPort = 8888;
-var logData = function(message,request,response) {
+var logData = function(message,request,response,prompt) {
 	var dateLog = new Date();
 	var logDir = './log';
 	if (!fs.existsSync(logDir)) 
@@ -16,6 +16,8 @@ var logData = function(message,request,response) {
 	var logMessage = date + ' ' + time + ' ::\r\n>>';
 	logMessage += message + '\r\n>>' + request + '\r\n>>' + response + '\r\n\r\n';
 	fs.appendFile(logPath,logMessage,function(err){if(err)console.log(err)});
+	
+	if (prompt) console.log(date + ' ' + time + ' ' + message);
 };
 
 http.createServer(function (request, response) {
@@ -24,36 +26,52 @@ http.createServer(function (request, response) {
 	var errorMessages = {
 		404: 'Invalid End Point'
 	};
-	var task = function(i,callback) {
-		var jsonData = JSON.stringify(requestData.data[i]);
-		var req = http.request({
-			hostname: requestData.url.host,
-			port: 80,
-			path: requestData.url.pathname,
-			method: 'POST',
-			headers: {
-				'X-Auth-Code': requestData.mac[i],
-				'Content-Type': 'application/json',
-				'Content-Length': jsonData.length
-			}
-		}, function(res) {
-			res.setEncoding('utf8');
-			var result = '';
-			res.on('data', function (data) {
-				result += data;
+	var task = function(taskReq,callback) {
+		var jsonData = JSON.stringify(taskReq.data);
+		taskReq.url = url.parse(taskReq.url,true);
+		try
+		{
+			var req = http.request({
+				hostname: taskReq.url.host,
+				port: 80,
+				path: taskReq.url.pathname,
+				method: 'POST',
+				headers: {
+					'X-Auth-Code': taskReq.mac,
+					'Content-Type': 'application/json',
+					'Content-Length': jsonData.length
+				}
+			}, function(res) {
+				res.setEncoding('utf8');
+				var result = '';
+				res.on('data', function (data) {
+					result += data;
+				});
+				res.on('end',function(){
+					if(res.statusCode != 200)
+						result = {
+							isSuccess: false,
+							errorMessages: errorMessages[res.statusCode] || 'Error: Status Code' + res.statusCode
+						};
+					else result = JSON.parse(result);
+					
+					callback(false,result);
+				});
 			});
-			res.on('end',function(){
-				if(res.statusCode != 200)
-					result = errorMessages[res.statusCode] || 'Error: Status Code' + res.statusCode;
-				callback(false,result);
+			req.write(jsonData);
+			req.end();
+		} catch (ex) {
+			logData("Get an exception while requesting to server.",JSON.stringify(ex),null,true);
+			callback(false,{
+				isSuccess: false,
+				errorMessages: 'Error: Got request Exception.'
 			});
-		});
-		req.write(jsonData);
-		req.end();
+		}
 	}
+	var start = null;
 	
     request.on('data', function(data) {
-		var start = new Date();
+		start = new Date();
 		requestBody += data;
     });
 	
@@ -61,26 +79,23 @@ http.createServer(function (request, response) {
 		if(requestBody.length) 
 			requestData = JSON.parse(requestBody);		
 		
-		if (!requestBody.length || !requestData.url) {
-			logData('Invalid request data',requestBody,'');
+		if (!requestBody.length || !requestData.length) {
+			logData('Invalid request data',requestBody,'',true);
 			response.writeHead(400, {'Content-Type': 'text/html'});
-			response.end('Bad Request');
+			response.end('Bad Request: ' + requestBody);
 			return;
 		}
 		
-		requestData.url = url.parse(requestData.url,true);
-		requestData.tasks = [];
-		for (var i=0; i < requestData.data.length; i++) 
-			requestData.tasks.push(task.bind(null,i));
+		var tasks = [];
+		for (var i=0; i < requestData.length; i++) 
+			tasks.push(task.bind(null,requestData[i]));
 		
-		async.parallel(requestData.tasks,function(err,results){
+		async.parallel(tasks,function(err,results){
 			var end = new Date();
 			var elapsedTime = end.getTime() - start.getTime();
-			
-			console.log('Elapsed time: ' + elapsedTime);
-			
+						
 			results = JSON.stringify(results);
-			logData('All request done. Elapsed time: ' + elapsedTime + 'ms',requestBody,results);
+			logData('All request done. Elapsed time: ' + elapsedTime + 'ms',requestBody,results,true);
 			
 			response.writeHead(200, {'Content-Type': 'application/json'});
 			response.end(results);
@@ -88,5 +103,5 @@ http.createServer(function (request, response) {
     });
 	
 }).listen(serverPort);
-logData('Server running at localhost:'+serverPort);
-console.log('Server running at localhost:'+serverPort);
+
+logData('Server running at localhost:'+serverPort,null,null,true);
