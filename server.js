@@ -74,10 +74,6 @@ http.createServer(function (request, response) {
 			console.log(http.globalAgent.sockets[options.hostname + ':' + options.port].length);
 		} catch (ex) {
 			logData("Get an exception while requesting to server.",JSON.stringify(ex),null,true);
-			callback(false,{
-				isSuccess: false,
-				errorMessages: 'Error: Got request Exception.'
-			});
 		}
 	};
 	var start = null;
