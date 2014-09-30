@@ -30,54 +30,48 @@ http.createServer(function (request, response) {
 	var task = function(taskReq,callback) {
 		var jsonData = JSON.stringify(taskReq.data);
 		taskReq.url = url.parse(taskReq.url,true);
-		try
-		{
-			var tstart = new Date();
-			var options = {
-				hostname: taskReq.url.host,
-				port: 80,
-				path: taskReq.url.pathname,
-				agent: false,
-				method: 'POST',
-				headers: {
-					'X-Auth-Code': taskReq.mac,
-					'Content-Type': 'application/json',
-					'Content-Length': jsonData.length
-				}
-			};
-			var req = http.request(options, function(res) {
-				res.setEncoding('utf8');
-				var resultContent = '';
-				var tdata = new Date();
-				res.on('data', function (data) {
-					resultContent += data;
-				});
-				res.on('end',function(){
-					var tend = new Date();
-					var result = {};
-					result = JSON.parse(resultContent);
-					if(res.statusCode != 200 || !result || !resultContent)
-					result = {
-						isSuccess: false,
-						resultContent: resultContent,
-						errorMessages: errorMessages[res.statusCode] || 'Error: Status Code' + res.statusCode
-					};
-					
-					result.taskLatency = tend.getTime() - tstart.getTime();
-					result.taskStart = tstart.getHours() + ":" + tstart.getMinutes() + ":" + tstart.getSeconds() + "." + tstart.getMilliseconds();
-					result.taskEnd = tend.getHours() + ":" + tend.getMinutes() + ":" + tend.getSeconds() + "." + tend.getMilliseconds();
-					result.taskData = tdata.getHours() + ":" + tdata.getMinutes() + ":" + tdata.getSeconds() + "." + tdata.getMilliseconds();
-					
-					callback(false,result);
-				});
+		
+		var tstart = new Date();
+		var options = {
+			hostname: taskReq.url.host,
+			port: 80,
+			path: taskReq.url.pathname,
+			agent: false,
+			method: 'POST',
+			headers: {
+				'X-Auth-Code': taskReq.mac,
+				'Content-Type': 'application/json',
+				'Content-Length': jsonData.length
+			}
+		};
+		var req = http.request(options, function(res) {
+			res.setEncoding('utf8');
+			var resultContent = '';
+			var tdata = new Date();
+			res.on('data', function (data) {
+				resultContent += data;
 			});
-			req.write(jsonData);
-			req.end();
-			
-			console.log(http.globalAgent.sockets[options.hostname + ':' + options.port].length);
-		} catch (ex) {
-			logData("Get an exception while requesting to server.",JSON.stringify(ex),null,true);
-		}
+			res.on('end',function(){
+				var tend = new Date();
+				var result = {};
+				result = JSON.parse(resultContent);
+				if(res.statusCode != 200 || !result || !resultContent)
+				result = {
+					isSuccess: false,
+					resultContent: resultContent,
+					errorMessages: errorMessages[res.statusCode] || 'Error: Status Code' + res.statusCode
+				};
+				
+				result.taskLatency = tend.getTime() - tstart.getTime();
+				result.taskStart = tstart.getHours() + ":" + tstart.getMinutes() + ":" + tstart.getSeconds() + "." + tstart.getMilliseconds();
+				result.taskEnd = tend.getHours() + ":" + tend.getMinutes() + ":" + tend.getSeconds() + "." + tend.getMilliseconds();
+				result.taskData = tdata.getHours() + ":" + tdata.getMinutes() + ":" + tdata.getSeconds() + "." + tdata.getMilliseconds();
+				
+				callback(false,result);
+			});
+		});
+		req.write(jsonData);
+		req.end();
 	};
 	var start = null;
 	
