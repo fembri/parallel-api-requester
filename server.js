@@ -31,6 +31,7 @@ http.createServer(function (request, response) {
 		taskReq.url = url.parse(taskReq.url,true);
 		try
 		{
+			var tstart = new Date();
 			var req = http.request({
 				hostname: taskReq.url.host,
 				port: 80,
@@ -67,7 +68,7 @@ http.createServer(function (request, response) {
 				errorMessages: 'Error: Got request Exception.'
 			});
 		}
-	}
+	};
 	var start = null;
 	
     request.on('data', function(data) {
@@ -93,9 +94,12 @@ http.createServer(function (request, response) {
 		async.parallel(tasks,function(err,results){
 			var end = new Date();
 			var elapsedTime = end.getTime() - start.getTime();
-						
+			
 			results = JSON.stringify(results);
-			logData('All request done. Elapsed time: ' + elapsedTime + 'ms',requestBody,results,true);
+			logData(
+				'All request done. Elapsed time: ' + elapsedTime + 'ms. Start:' + start.getHours() + ':' + start.getMinutes() + ':' + start.getSeconds() + '.' + start.getMilliseconds() + '. End:' + end.getHours() + ':' + end.getMinutes() + ':' + end.getSeconds() + '.' + end.getMilliseconds(),
+				requestBody,results,true
+			);
 			
 			response.writeHead(200, {'Content-Type': 'application/json'});
 			response.end(results);
