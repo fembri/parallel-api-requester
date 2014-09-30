@@ -49,12 +49,16 @@ http.createServer(function (request, response) {
 					result += data;
 				});
 				res.on('end',function(){
+					var tend = new Date();
 					if(res.statusCode != 200)
 						result = {
 							isSuccess: false,
 							errorMessages: errorMessages[res.statusCode] || 'Error: Status Code' + res.statusCode
 						};
 					else result = JSON.parse(result);
+					result.taskLatency = tend.getTime() - tstart.getTime();
+					result.taskStart = tstart.getHours + ":" + tstart.getMinutes() + ":" + tstart.getSeconds() + "." + tstart.getMilliseconds();
+					result.taskEnd = tend.getHours + ":" + tend.getMinutes() + ":" + tend.getSeconds() + "." + tend.getMilliseconds();
 					
 					callback(false,result);
 				});
