@@ -33,7 +33,7 @@ http.createServer(function (request, response) {
 		try
 		{
 			var tstart = new Date();
-			var req = http.request({
+			var options = {
 				hostname: taskReq.url.host,
 				port: 80,
 				path: taskReq.url.pathname,
@@ -43,7 +43,8 @@ http.createServer(function (request, response) {
 					'Content-Type': 'application/json',
 					'Content-Length': jsonData.length
 				}
-			}, function(res) {
+			};
+			var req = http.request(options, function(res) {
 				res.setEncoding('utf8');
 				var result = '';
 				var tdata = new Date();
@@ -69,7 +70,7 @@ http.createServer(function (request, response) {
 			req.write(jsonData);
 			req.end();
 			
-			console.log(http.globalAgent.sockets);
+			console.log(http.globalAgent.sockets[options.hostname + ':' + options.port].length);
 		} catch (ex) {
 			logData("Get an exception while requesting to server.",JSON.stringify(ex),null,true);
 			callback(false,{
