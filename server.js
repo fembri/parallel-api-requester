@@ -28,7 +28,7 @@ http.createServer(function (request, response) {
 		404: 'Invalid End Point'
 	};
 	var task = function(taskReq,callback) {
-		var jsonData = JSON.stringify(taskReq.data);
+		var jsonData = taskReq.data;//JSON.stringify(taskReq.data);
 		taskReq.url = url.parse(taskReq.url,true);
 		
 		var tstart = new Date();
@@ -54,7 +54,9 @@ http.createServer(function (request, response) {
 			res.on('end',function(){
 				var tend = new Date();
 				var result = {};
-				result = JSON.parse(resultContent);
+				try{
+					result = JSON.parse(resultContent);
+				} catch (e) { result = false; }
 				if(res.statusCode != 200 || !result || !resultContent)
 				result = {
 					isSuccess: false,
@@ -82,8 +84,9 @@ http.createServer(function (request, response) {
 	
     request.on('end', function() {
 		if(requestBody.length) 
-			requestData = JSON.parse(requestBody);		
-		
+			try {
+				requestData = JSON.parse(requestBody);		
+			} catch (e) { requestData = []; }
 		if (!requestBody.length || !requestData.length) {
 			logData('Invalid request data',requestBody,'',true);
 			response.writeHead(400, {'Content-Type': 'text/html'});
