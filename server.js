@@ -6,7 +6,7 @@ var fs = require('fs');
 var serverPort = 8888;
 var logData = function(message,request,response,prompt) {
 	var dateLog = new Date();
-	var logDir = './log';
+	var logDir = __dirname + '/log';
 	if (!fs.existsSync(logDir)) 
 		fs.mkdirSync(logDir);
 		
