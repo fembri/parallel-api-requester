@@ -76,13 +76,25 @@ http.createServer(function (request, response) {
 		req.end();
 	};
 	var start = null;
-	
+		
     request.on('data', function(data) {
 		start = new Date();
 		requestBody += data;
     });
 	
     request.on('end', function() {
+		if (["127.0.0.1","202.65.118.194"].indexOf(request.connection.remoteAddress) == -1)
+		{
+			logData(
+				'Unidentified client: ' + request.connection.remoteAddress,
+				requestBody,null,true
+			);
+			
+			response.writeHead(404, {"Content-Type": "text/plain"});
+			response.write("404 Not Found\n");
+			return response.end();
+		}
+		
 		if(requestBody.length) 
 			try {
 				requestData = JSON.parse(requestBody);		
