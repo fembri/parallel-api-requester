@@ -83,7 +83,7 @@ http.createServer(function (request, response) {
     });
 	
     request.on('end', function() {
-		if (["127.0.0.1","202.65.118.194"].indexOf(request.connection.remoteAddress) == -1)
+		if (["127.0.0.1"].indexOf(request.connection.remoteAddress) == -1)
 		{
 			logData(
 				'Unidentified client: ' + request.connection.remoteAddress,
